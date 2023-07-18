@@ -54,8 +54,6 @@ Plugin 'tpope/vim-fugitive'
 " Plugin 'L9'
 " Git plugin not hosted on GitHub
 Plugin 'git://git.wincent.com/command-t.git'
-" git repos on your local machine (i.e. when working on your own plugin)
-Plugin 'file:///home/gmarik/path/to/plugin'
 " The sparkup vim script is in a subdirectory of this repo called vim.
 " Pass the path to set the runtimepath properly.
 Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
@@ -63,6 +61,11 @@ Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
 " different version somewhere else.
 " Plugin 'ascenator/L9', {'name': 'newL9'}
 Plugin 'preservim/nerdtree'  " 文件树显示
+Plugin 'Yggdroot/LeaderF' " 模糊搜索
+Plugin 'mhinz/vim-startify' " vim 起始界面
+Plugin 'jiangmiao/auto-pairs'
+Plugin 'preservim/tagbar'  " 显示函数tag
+"Plugin 'vim-airline/vim-airline'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -79,12 +82,6 @@ filetype plugin indent on    " required
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
 
-" Setting for NERDTree
-nnoremap jf :NERDTreeFocus<CR>
-" Exit Vim if NERDTree is the only window remaining in the only tab.
-autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-" Close the tab if NERDTree is the only window remaining in it.
-autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 
 " =============================================================================
 "                          << 以下为用户自定义配置 >>
@@ -110,11 +107,9 @@ filetype plugin on                                    "针对不同的文件类�
 filetype plugin indent on                             "启用缩进
 set smartindent                                       "启用智能对齐方式
 set tabstop=8                                         "设置Tab键的宽度
-set softtabstop=8                                       "设置Tab键的宽度
-set shiftwidth=8                                      "换行时自动缩进4个空格
 "设置TAB和换行的宽度
-set softtabstop=8                                       "设置Tab键的宽度
-set shiftwidth=8                                      "换行时自动缩进4个空格
+set softtabstop=4                                       "设置Tab键的宽度
+set shiftwidth=4                                      "换行时自动缩进4个空格
 set expandtab                                         "将Tab键转换为空格
 set smarttab                                          "指定按一次backspace就删除shiftwidth宽度的空格
 set wrap                                              "自动换行
@@ -230,11 +225,32 @@ endfunc
 " -----------------------------------------------------------------------------
 "  < 其它配置 >
 " -----------------------------------------------------------------------------
+
 set writebackup                             "保存文件前建立备份，保存成功后删除该备份
-set nobackup                                "设置无备份文件
+" set nobackup                                "设置无备份文件
 " set noswapfile                              "设置无临时文件
 " set vb t_vb=                                "关闭提示音
 
+" -----------------------------------------------------
+" buffer 配置
+" 允许隐藏被修改过的 buffer
+set hidden
+
+" normal 模式下使用 bl 列出 Buffer 列表
+nnoremap <silent> bl :ls<CR>
+
+" normal 模式下使用 bo 打开一个新 Buffer
+nnoremap <silent> bo :enew<CR>
+
+" normal 模式下使用 bn 切换到下一个 Buffer
+nnoremap <silent> bn :bnext<CR>
+
+" normal 模式下使用 bn 切换到上一个 Buffer
+nnoremap <silent> bp :bprevious<CR>
+
+" normal 模式下使用 bd 关闭当前 Buffer
+nnoremap <silent> bd :bdelete<CR>
+" -----------------------------------------------------
 
 " =============================================================================
 "                          << 以下为常用工具配置 >>
@@ -251,21 +267,64 @@ if has("cscope")
     "使支持用 Ctrl+]  和 Ctrl+t 快捷键在代码间跳转
     set cscopetag
     "如果你想反向搜索顺序设置为1
-    cs add cscope.out
+    "cs add cscope.out
     set csto=0
     set cscopeverbose
     "快捷键设置
     nmap \s :cs find s <C-R>=expand("<cword>")<CR><CR>
     nmap \g :cs find g <C-R>=expand("<cword>")<CR><CR>
     nmap \f :cs find f <C-R>=expand("<cfile>")<CR><CR>
+    " 自动到上级目录查找cscope.out文件
+    if filereadable("cscope.out")
+        cs add cscope.out
+    else
+        let cscope_file=findfile("cscope.out",".;")
+        let cscope_pre=matchstr(cscope_file,".*/")
+        if !empty(cscope_file) && filereadable(cscope_file)
+            set nocsverb
+            exe "cs add" cscope_file cscope_pre
+            set csverb
+        endif
+    endif
 endif
 
 " -----------------------------------------------------------------------------
+" 注：上面配置中的"<Leader>"在本软件中设置为"\"键（引号里的反斜杠），如<Leader>t
+" 指在常规模式下按"\"键加"t"键，这里不是同时按，而是先按"\"键后按"t"键，间隔在一
+" 秒内，而<Leader>cs是先按"\"键再按"c"又再按"s"键
+
 "  < ctags 工具配置 >
 " -----------------------------------------------------------------------------
 " 对浏览代码非常的方便,可以在函数,变量之间跳转等
 "set tags=./tags;                            "向上级目录递归查找tags文件（好像只有在Windows下才有用）
 
+
+" -----------------------------------------------------------------------------
+"  < vim -starify 工具配置 >
+" -----------------------------------------------------------------------------
+let g:startify_custom_header = ['good good study, day day up']
+let g:startify_custom_footer = ['我也是有底线的！']
+
+" -----------------------------------------------------------------------------
+"  < NERDTree 工具配置 >
+" -----------------------------------------------------------------------------
+nnoremap nd :NERDTreeFocus<CR>
+" Exit Vim if NERDTree is the only window remaining in the only tab.
+autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+" Close the tab if NERDTree is the only window remaining in it.
+autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+
+" -----------------------------------------------------------------------------
+"  < leaderF 配置 >
+" -----------------------------------------------------------------------------
+let g:Lf_ShortcutF = '<c-f>'
+let g:Lf_WorkingDirectoryMode = 'AF'
+let g:Lf_RootMarkers = ['.git', '.svn', '.hg', '.project', '.root']
+let g:Lf_UseVersionControlTool=1 "这个是默认选项, 可以不写
+let g:Lf_DefaultExternalTool='rg'
+"autocmd BufNewFile,BufRead X:/yourdir* let g:Lf_WildIgnore={'file':['*.vcproj', '*.vcxproj'],'dir':[]} " 忽略文件
+
+nmap tg :TagbarToggle<CR>
 " =============================================================================
 "                          << 以下为常用自动命令配置 >>
 " =============================================================================
@@ -276,7 +335,3 @@ endif
 " =============================================================================
 "                          << 其它 >>
 " =============================================================================
-
-" 注：上面配置中的"<Leader>"在本软件中设置为"\"键（引号里的反斜杠），如<Leader>t
-" 指在常规模式下按"\"键加"t"键，这里不是同时按，而是先按"\"键后按"t"键，间隔在一
-" 秒内，而<Leader>cs是先按"\"键再按"c"又再按"s"键
