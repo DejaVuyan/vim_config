@@ -45,7 +45,7 @@ call vundle#begin()
 
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
-
+Plugin 'skywind3000/vim-auto-popmenu'
 " The following are examples of different formats supported.
 " Keep Plugin commands between vundle#begin/end.
 " plugin on GitHub repo
@@ -66,6 +66,8 @@ Plugin 'mhinz/vim-startify' " vim 起始界面
 Plugin 'jiangmiao/auto-pairs'
 Plugin 'preservim/tagbar'  " 显示函数tag
 "Plugin 'vim-airline/vim-airline'
+Plugin 'bling/vim-bufferline'
+Plugin 'skywind3000/vim-dict'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -166,8 +168,8 @@ autocmd Bufnewfile *.py exec ":call HeaderPython()"
 func HeaderC()
     call setline(1, "/*************************************************************************")
     call setline(2, " > File Name: ".expand("%"))
-    call setline(3, " > Author: ")
-    call setline(4, " > Email: ")
+    call setline(3, " > Author: yangyuzn")
+    call setline(4, " > Email: yangyuzun@163.com")
     call setline(5, " > Created Time: ".strftime("%c"))
     call setline(6, "************************************************************************/")
     call setline(7, "")
@@ -178,8 +180,8 @@ endfunc
 func HeaderShell()
     call setline(1,"#########################################################################")
     call setline(2, "# File Name: ".expand("%"))
-    call setline(3, "# Author: ")
-    call setline(4, "# Email: ")
+    call setline(3, "# Author: yangyuzun")
+    call setline(4, "# Email: yangyuzun@163.com")
     call setline(5, "# Created Time: ".strftime("%c"))
     call setline(6,"#########################################################################")
     call setline(7, "#!/bin/bash")
@@ -237,7 +239,7 @@ set writebackup                             "保存文件前建立备份，保�
 set hidden
 
 " normal 模式下使用 bl 列出 Buffer 列表
-nnoremap <silent> bl :ls<CR>
+nnoremap <silent> bl :ls<CR>:b<Space>
 
 " normal 模式下使用 bo 打开一个新 Buffer
 nnoremap <silent> bo :enew<CR>
@@ -249,7 +251,7 @@ nnoremap <silent> bn :bnext<CR>
 nnoremap <silent> bp :bprevious<CR>
 
 " normal 模式下使用 bd 关闭当前 Buffer
-nnoremap <silent> bd :bdelete<CR>
+nnoremap <silent> bd :bd<CR>
 " -----------------------------------------------------
 
 " =============================================================================
@@ -308,7 +310,7 @@ let g:startify_custom_footer = ['我也是有底线的！']
 " -----------------------------------------------------------------------------
 "  < NERDTree 工具配置 >
 " -----------------------------------------------------------------------------
-nnoremap nd :NERDTreeFocus<CR>
+nnoremap nd :NERDTreeToggle<CR>
 " Exit Vim if NERDTree is the only window remaining in the only tab.
 autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 " Close the tab if NERDTree is the only window remaining in it.
@@ -325,6 +327,21 @@ let g:Lf_DefaultExternalTool='rg'
 "autocmd BufNewFile,BufRead X:/yourdir* let g:Lf_WildIgnore={'file':['*.vcproj', '*.vcxproj'],'dir':[]} " 忽略文件
 
 nmap tg :TagbarToggle<CR>
+
+" -----------------------------------------------------------------------------
+"  < vim-auto-popmenu 配置 >
+" -----------------------------------------------------------------------------
+" 设定需要生效的文件类型，如果是 "*" 的话，代表所有类型
+let g:apc_enable_ft = {'text':1, 'markdown':1, 'c':1, 'c++':1}
+
+" 设定从字典文件以及当前打开的文件里收集补全单词，详情看 ':help cpt'
+"set cpt=.,k,w,b
+
+" 不要自动选中第一个选项。
+set completeopt=menu,menuone,noselect
+
+" 禁止在下方显示一些啰嗦的提示
+set shortmess+=c
 " =============================================================================
 "                          << 以下为常用自动命令配置 >>
 " =============================================================================
